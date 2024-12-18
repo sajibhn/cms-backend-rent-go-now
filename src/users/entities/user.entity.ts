@@ -1,13 +1,14 @@
 import { BaseEntity } from "src/common/BaseEntity";
-import { Column, Entity } from "typeorm";
+import { Session } from "src/sessions/entities/session.entity";
+import { Column, Entity, JoinColumn, OneToMany } from "typeorm";
 
 @Entity()
 export class Users extends BaseEntity {
 
-	@Column({name: 'first_name'})
+	@Column()
 	firstName: string;
 
-	@Column({name: 'last_name'})
+	@Column()
 	lastName: string;
 
 	@Column({ unique: true })
@@ -19,4 +20,8 @@ export class Users extends BaseEntity {
 	@Column({ default: false })
 	isBanned: boolean;
 
+
+	@OneToMany(() => Session, (session) => session.user)
+	@JoinColumn([{ referencedColumnName: 'id' }])
+	sessions: Session[];
 }

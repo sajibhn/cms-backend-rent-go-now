@@ -1,9 +1,12 @@
-import { BadRequestException, HttpException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { OtpDto } from './dto/opt.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Users } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
+import { SignInDto } from './dto/signin.dto';
+import { JwtService } from '@nestjs/jwt';
+import { Session } from 'src/sessions/entities/session.entity';
 const otpGenerator = require('otp-generator');
 const nodemailer = require("nodemailer");
 
@@ -14,11 +17,35 @@ export class AuthService {
 			@InjectRepository(Users)
 			private usersRepo: Repository<Users>,
 
-			private configService: ConfigService
+			@InjectRepository(Session)
+			private sessionsRepo: Repository<Session>,
+
+			private configService: ConfigService,
+			private readonly jwtService: JwtService,
 		) {}
 
-	signin() {
-		
+	async signin({ email, otp }: SignInDto) {
+
+		const user = await this.usersRepo.findOne({ where: { email, otp } });
+		if (!user) {
+			throw new UnauthorizedException('Invalid credentials');
+		}
+
+		user.otp = null;
+		await this.usersRepo.save(user);
+
+		const payload = { email: user.email, id: user.id };
+		const token = this.jwtService.sign(payload);
+
+		const session = this.sessionsRepo.create({
+			session: token,
+			user,
+			lastActivity: new Date(),
+		});
+
+		await this.sessionsRepo.save(session);
+
+		return token;
 	}
 
 	async sendOtp(body: OtpDto) {
