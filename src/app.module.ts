@@ -7,6 +7,9 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { SessionsModule } from './sessions/sessions.module';
+import { StateModule } from './state/state.module';
+import { CityModule } from './city/city.module';
+import { NeighborhoodModule } from './neighborhood/neighborhood.module';
 
 @Module({
   imports: [
@@ -14,7 +17,10 @@ import { SessionsModule } from './sessions/sessions.module';
     TypeOrmModule.forRoot(dataSourceOptions),
     UsersModule,
     AuthModule,
-    SessionsModule
+    SessionsModule,
+    StateModule,
+    CityModule,
+    NeighborhoodModule
   ],
   controllers: [AppController],
   providers: [AppService],
