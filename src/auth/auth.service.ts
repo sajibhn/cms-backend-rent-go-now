@@ -26,7 +26,9 @@ export class AuthService {
 
 	async signin({ email, otp }: SignInDto) {
 
-		const user = await this.usersRepo.findOne({ where: { email, otp } });
+		const user = await this.usersRepo.findOne({ 
+			where: { email, otp }
+		});
 		if (!user) {
 			throw new UnauthorizedException('Invalid credentials');
 		}
@@ -45,7 +47,17 @@ export class AuthService {
 
 		await this.sessionsRepo.save(session);
 
-		return token;
+		const roles = ['SUPERADMIN'];
+
+		return {
+			id: user.id,
+			firstName: user.firstName,
+			lastName: user.lastName,
+			email: user.email,
+			roles,
+			token, 
+			session,
+		};
 	}
 
 	async sendOtp(body: OtpDto) {
