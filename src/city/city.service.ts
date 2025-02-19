@@ -35,11 +35,18 @@ export class CityService {
   }
 
   async findAll() {
-    return await this.repo.find();
+    return await this.repo.find({
+      relations: ['state']
+    });
   }
 
   async findOne(id: string) {
-    return await this.repo.findOneBy({ id });
+    return await this.repo.findOne({
+      where: {
+        id
+      },
+      relations: ['state']
+     });
   }
 
 

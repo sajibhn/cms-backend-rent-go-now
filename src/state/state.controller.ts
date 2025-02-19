@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { StateService } from './state.service';
 import { CreateStateDto } from './dto/create-state.dto';
 import { UpdateStateDto } from './dto/update-state.dto';
@@ -13,8 +13,8 @@ export class StateController {
   }
 
   @Get()
-  findAll() {
-    return this.stateService.findAll();
+  findAll(@Query('name') name?: string) {
+    return this.stateService.findAll(name);
   }
 
   @Get(':id')

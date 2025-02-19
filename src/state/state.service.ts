@@ -3,7 +3,7 @@ import { CreateStateDto } from './dto/create-state.dto';
 import { UpdateStateDto } from './dto/update-state.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { State } from './entities/state.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { Point } from 'geojson';
 
 @Injectable()
@@ -28,8 +28,14 @@ export class StateService {
     return await this.repo.save(state);
   }
 
-  async findAll() {
-    return await this.repo.find();
+  async findAll(name?: string) {
+    const qb = this.repo.createQueryBuilder('state');
+
+    if (name?.length) {
+      qb.andWhere('state.name ILIKE :name', { name: `%${name}%` });
+    }
+
+    return await qb.getMany();
   }
 
   async findOne(id: string) {
@@ -60,5 +66,11 @@ export class StateService {
 
   async remove(id: string) {
     await this.repo.delete(id);
+  }
+
+  async findByName(name: string) {
+    return await this.repo.find({
+      where: { name: ILike(`%${name}%`) },
+    });
   }
 }
