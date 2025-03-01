@@ -34,11 +34,21 @@ export class NeighborhoodService {
   }
 
   async findAll() {
-    return await this.repo.find();
+    const qb = this.repo.createQueryBuilder('neighborhood')
+      .leftJoinAndSelect('neighborhood.city', 'city')
+
+    return await qb
+      .orderBy('neighborhood.updated_at', 'DESC')
+      .getMany();
   }
 
   async findOne(id: string) {
-    return await this.repo.findOneBy({ id });
+    return await this.repo.findOne({
+      where: {
+        id
+      },
+      relations: ['city']
+    });
   }
 
   async update(id: string, body: UpdateNeighborhoodDto) {

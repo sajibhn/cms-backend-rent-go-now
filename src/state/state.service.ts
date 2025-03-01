@@ -11,7 +11,7 @@ export class StateService {
   constructor(
     @InjectRepository(State)
     private readonly repo: Repository<State>,
-  ) {}
+  ) { }
 
   async create(body: CreateStateDto) {
 
@@ -35,7 +35,9 @@ export class StateService {
       qb.andWhere('state.name ILIKE :name', { name: `%${name}%` });
     }
 
-    return await qb.getMany();
+    return await qb
+      .orderBy('state.updated_at', 'DESC')
+      .getMany();
   }
 
   async findOne(id: string) {

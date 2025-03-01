@@ -34,10 +34,19 @@ export class CityService {
 
   }
 
-  async findAll() {
-    return await this.repo.find({
-      relations: ['state']
-    });
+  async findAll(name?: string) {
+
+    const qb = this.repo.createQueryBuilder('city')
+
+    if (name?.length) {
+      qb.andWhere('city.name ILIKE :name', { name: `%${name}%` });
+    }
+
+
+    return await qb
+      .leftJoinAndSelect('city.state', 'state')
+      .orderBy('city.updated_at', 'DESC')
+      .getMany();
   }
 
   async findOne(id: string) {
@@ -46,7 +55,7 @@ export class CityService {
         id
       },
       relations: ['state']
-     });
+    });
   }
 
 
