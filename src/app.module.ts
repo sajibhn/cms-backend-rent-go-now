@@ -10,6 +10,7 @@ import { SessionsModule } from './sessions/sessions.module';
 import { StateModule } from './state/state.module';
 import { CityModule } from './city/city.module';
 import { NeighborhoodModule } from './neighborhood/neighborhood.module';
+import { ApartmentsModule } from './apartments/apartments.module';
 
 @Module({
   imports: [
@@ -20,7 +21,8 @@ import { NeighborhoodModule } from './neighborhood/neighborhood.module';
     SessionsModule,
     StateModule,
     CityModule,
-    NeighborhoodModule
+    NeighborhoodModule,
+    ApartmentsModule
   ],
   controllers: [AppController],
   providers: [AppService],

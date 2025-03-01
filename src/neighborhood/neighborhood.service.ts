@@ -33,9 +33,13 @@ export class NeighborhoodService {
     return await this.repo.save(neighborhood);
   }
 
-  async findAll() {
+  async findAll(name?: string) {
     const qb = this.repo.createQueryBuilder('neighborhood')
       .leftJoinAndSelect('neighborhood.city', 'city')
+
+    if (name?.length) {
+      qb.andWhere('neighborhood.name ILIKE :name', { name: `%${name}%` });
+    }
 
     return await qb
       .orderBy('neighborhood.updated_at', 'DESC')

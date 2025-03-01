@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Query } from '@nestjs/common';
 import { NeighborhoodService } from './neighborhood.service';
 import { CreateNeighborhoodDto } from './dto/create-neighborhood.dto';
 import { UpdateNeighborhoodDto } from './dto/update-neighborhood.dto';
@@ -14,8 +14,8 @@ export class NeighborhoodController {
   }
 
   @Get()
-  findAll() {
-    return this.neighborhoodService.findAll();
+  findAll(@Query('name') name?: string) {
+    return this.neighborhoodService.findAll(name);
   }
 
   @Get(':id')
