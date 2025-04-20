@@ -1,7 +1,8 @@
 import { Point } from "geojson";
 import { BaseEntity } from "src/common/BaseEntity";
 import { Neighborhood } from "src/neighborhood/entities/neighborhood.entity";
-import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
+import { Unit } from "src/units/entities/unit.entity";
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 
 @Entity()
 export class Apartment extends BaseEntity {
@@ -28,5 +29,8 @@ export class Apartment extends BaseEntity {
   @ManyToOne(() => Neighborhood, neighborhood => neighborhood.apartment)
   @JoinColumn([{ referencedColumnName: 'id' }])
   neighborhood: Neighborhood;
+
+  @OneToMany(() => Unit, unit => unit.apartment)
+  units: Unit[];
 
 }

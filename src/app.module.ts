@@ -11,6 +11,7 @@ import { StateModule } from './state/state.module';
 import { CityModule } from './city/city.module';
 import { NeighborhoodModule } from './neighborhood/neighborhood.module';
 import { ApartmentsModule } from './apartments/apartments.module';
+import { UnitsModule } from './units/units.module';
 
 @Module({
   imports: [
@@ -22,7 +23,8 @@ import { ApartmentsModule } from './apartments/apartments.module';
     StateModule,
     CityModule,
     NeighborhoodModule,
-    ApartmentsModule
+    ApartmentsModule,
+    UnitsModule
   ],
   controllers: [AppController],
   providers: [AppService],

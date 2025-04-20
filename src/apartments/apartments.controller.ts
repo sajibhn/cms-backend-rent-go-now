@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { ApartmentsService } from './apartments.service';
 import { CreateApartmentDto } from './dto/create-apartment.dto';
 import { UpdateApartmentDto } from './dto/update-apartment.dto';
@@ -13,8 +13,8 @@ export class ApartmentsController {
   }
 
   @Get()
-  findAll() {
-    return this.apartmentsService.findAll();
+  findAll(@Query('name') name?: string) {
+    return this.apartmentsService.findAll(name);
   }
 
   @Get(':id')
