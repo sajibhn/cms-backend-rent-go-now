@@ -6,6 +6,8 @@ import { Repository } from 'typeorm';
 import { City } from './entities/city.entity';
 import { Point } from 'geojson';
 import { State } from 'src/state/entities/state.entity';
+import { MediaService } from 'src/media/media.service';
+import { ImageParentType } from 'src/media/entities/media.entity';
 
 @Injectable()
 export class CityService {
@@ -15,6 +17,7 @@ export class CityService {
 
     @InjectRepository(State)
     private readonly stateRepo: Repository<State>,
+    private readonly mediaService: MediaService,
   ) { }
 
   async create(body: CreateCityDto) {
@@ -30,8 +33,12 @@ export class CityService {
       state: { id: body.stateId }
     });
 
-    return await this.repo.save(city);
-
+    const savedCity = await this.repo.save(city);
+    const media = await this.mediaService.saveImages(ImageParentType.CITY, savedCity.id, body.media)
+    return {
+      ...savedCity,
+      mediaUrls: media.map(m => m.imageUrl)
+    }
   }
 
   async findAll(name?: string) {
@@ -50,16 +57,22 @@ export class CityService {
   }
 
   async findOne(id: string) {
-    return await this.repo.findOne({
+    const media = await this.mediaService.findByTypeAndId(ImageParentType.CITY, id)
+    const city = await this.repo.findOne({
       where: {
         id
       },
       relations: ['state']
     });
+
+    return {
+      ...city,
+      media: media.map(m => m.imageUrl)
+    }
   }
 
 
-  async update(id: string, body: UpdateCityDto) {
+  async update(id: string, { media, ...body }: UpdateCityDto) {
     const city = await this.repo.findOne({
       where: { id },
       relations: ['state']
@@ -89,7 +102,10 @@ export class CityService {
 
     Object.assign(city, body)
 
-    return await this.repo.save(city);
+    await this.repo.save(city);
+    await this.mediaService.saveImages(ImageParentType.CITY, id, media)
+
+    return this.repo.findOneBy({ id });
   }
 
   async remove(id: string) {
