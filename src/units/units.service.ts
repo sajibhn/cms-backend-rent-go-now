@@ -5,6 +5,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Unit } from './entities/unit.entity';
 import { Repository } from 'typeorm';
 import { Apartment } from 'src/apartments/entities/apartment.entity';
+import { ImageParentType } from 'src/media/entities/media.entity';
+import { MediaService } from 'src/media/media.service';
 
 @Injectable()
 export class UnitsService {
@@ -13,6 +15,7 @@ export class UnitsService {
     private readonly repo: Repository<Unit>,
     @InjectRepository(Apartment)
     private readonly apartmentRepo: Repository<Apartment>,
+    private readonly mediaService: MediaService,
   ) { }
 
   async create(body: CreateUnitDto) {
@@ -29,7 +32,12 @@ export class UnitsService {
       apartment: { id: body.apartmentId },
     });
 
-    return await this.repo.save(unit);
+    const savedUnit = await this.repo.save(unit);
+    const media = await this.mediaService.saveImages(ImageParentType.UNIT, savedUnit.id, body.media)
+    return {
+      ...savedUnit,
+      mediaUrls: media.map(m => m.imageUrl)
+    }
   }
 
   async findAll(name?: string, apartmentId?: string) {
@@ -59,10 +67,15 @@ export class UnitsService {
       throw new NotFoundException('Unit not found');
     }
 
-    return unit;
+    const media = await this.mediaService.findByTypeAndId(ImageParentType.UNIT, id)
+
+    return {
+      ...unit,
+      media: media.map(m => m.imageUrl)
+    }
   }
 
-  async update(id: string, body: UpdateUnitDto) {
+  async update(id: string, { media, ...body }: UpdateUnitDto) {
     const unit = await this.repo.findOne({
       where: { id },
       relations: ['apartment'],
@@ -83,7 +96,10 @@ export class UnitsService {
     }
 
     Object.assign(unit, body);
-    return await this.repo.save(unit);
+    await this.repo.save(unit);
+
+    await this.mediaService.saveImages(ImageParentType.UNIT, id, media)
+    return this.repo.findOneBy({ id });
   }
 
   async remove(id: string) {

@@ -5,6 +5,7 @@ import {
 	IsOptional,
 	IsPositive,
 	IsNotEmpty,
+	IsArray,
 } from 'class-validator';
 
 export class CreateUnitDto {
@@ -58,4 +59,7 @@ export class CreateUnitDto {
 	@IsString()
 	@IsNotEmpty()
 	apartmentId: string;
+
+	@IsArray()
+	media: string[];
 }

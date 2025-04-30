@@ -5,7 +5,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { State } from './entities/state.entity';
 import { ILike, Repository } from 'typeorm';
 import { Point } from 'geojson';
-import { ImageParentType, Media } from 'src/media/entities/media.entity';
+import { ImageParentType } from 'src/media/entities/media.entity';
 import { MediaService } from 'src/media/media.service';
 
 @Injectable()
