@@ -7,9 +7,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { Session } from 'src/sessions/entities/session.entity';
 import { ConfigService } from '@nestjs/config';
+import { MediaModule } from 'src/media/media.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Neighborhood, City, Session])],
+  imports: [TypeOrmModule.forFeature([Neighborhood, City, Session]),
+    MediaModule
+  ],
   controllers: [NeighborhoodController],
   providers: [NeighborhoodService, Session, JwtService, ConfigService],
 })

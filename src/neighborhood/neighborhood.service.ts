@@ -6,6 +6,8 @@ import { Neighborhood } from './entities/neighborhood.entity';
 import { Repository } from 'typeorm';
 import { City } from 'src/city/entities/city.entity';
 import { Point } from 'geojson';
+import { ImageParentType } from 'src/media/entities/media.entity';
+import { MediaService } from 'src/media/media.service';
 
 @Injectable()
 export class NeighborhoodService {
@@ -15,7 +17,8 @@ export class NeighborhoodService {
     private readonly repo: Repository<Neighborhood>,
 
     @InjectRepository(City)
-    private readonly cityRepo: Repository<City>
+    private readonly cityRepo: Repository<City>,
+    private readonly mediaService: MediaService,
   ) { }
 
   async create(body: CreateNeighborhoodDto) {
@@ -30,7 +33,13 @@ export class NeighborhoodService {
       city: { id: body.cityId }
     });
 
-    return await this.repo.save(neighborhood);
+    const savedNeighborhood = await this.repo.save(neighborhood);
+
+    const media = await this.mediaService.saveImages(ImageParentType.NEIGHBORHOOD, savedNeighborhood.id, body.media  )
+        return {
+          ...savedNeighborhood,
+          mediaUrls: media.map(m => m.imageUrl)
+        }
   }
 
   async findAll(name?: string) {
@@ -47,15 +56,22 @@ export class NeighborhoodService {
   }
 
   async findOne(id: string) {
-    return await this.repo.findOne({
+    const neighborhood = await this.repo.findOne({
       where: {
         id
       },
       relations: ['city']
     });
+
+    const media = await this.mediaService.findByTypeAndId(ImageParentType.NEIGHBORHOOD, id)
+
+    return {
+      ...neighborhood,
+      media: media.map(m => m.imageUrl)
+    }
   }
 
-  async update(id: string, body: UpdateNeighborhoodDto) {
+  async update(id: string, { media, ...body }: UpdateNeighborhoodDto) {
     const neighborhood = await this.repo.findOne({
       where: { id },
       relations: ['city']
@@ -85,7 +101,9 @@ export class NeighborhoodService {
 
     Object.assign(neighborhood, body)
 
-    return await this.repo.save(neighborhood);
+    await this.repo.save(neighborhood);
+    await this.mediaService.saveImages(ImageParentType.NEIGHBORHOOD, id, media)
+    return this.repo.findOneBy({ id });
   }
 
   async remove(id: string) {
