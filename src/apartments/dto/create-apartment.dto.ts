@@ -1,4 +1,4 @@
-import { IsObject, IsOptional, IsString } from "class-validator";
+import { IsArray, IsObject, IsOptional, IsString } from "class-validator";
 import { Point } from "geojson";
 
 export class CreateApartmentDto {
@@ -20,4 +20,7 @@ export class CreateApartmentDto {
 
   @IsString()
   neighborhoodId: string;
+
+  @IsArray()
+  media: string[];
 }

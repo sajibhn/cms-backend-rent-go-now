@@ -6,6 +6,8 @@ import { Apartment } from './entities/apartment.entity';
 import { Repository } from 'typeorm';
 import { Point } from 'geojson';
 import { Neighborhood } from 'src/neighborhood/entities/neighborhood.entity';
+import { MediaService } from 'src/media/media.service';
+import { ImageParentType } from 'src/media/entities/media.entity';
 
 @Injectable()
 export class ApartmentsService {
@@ -16,6 +18,7 @@ export class ApartmentsService {
 
     @InjectRepository(Neighborhood)
     private readonly neighborhoodRepo: Repository<Neighborhood>,
+    private readonly mediaService: MediaService,
 
   ) { }
 
@@ -31,7 +34,13 @@ export class ApartmentsService {
       neighborhood: { id: body.neighborhoodId }
     });
 
-    return await this.repo.save(apartment);
+    const savedApartment = await this.repo.save(apartment);
+
+    const media = await this.mediaService.saveImages(ImageParentType.APARTMENT, savedApartment.id, body.media)
+    return {
+      ...savedApartment,
+      mediaUrls: media.map(m => m.imageUrl)
+    }
   }
 
   async findAll(name?: string) {
@@ -50,15 +59,22 @@ export class ApartmentsService {
   }
 
   async findOne(id: string) {
-    return await this.repo.findOne({
+    const apartment = await this.repo.findOne({
       where: {
         id
       },
       relations: ['neighborhood']
     });
+
+    const media = await this.mediaService.findByTypeAndId(ImageParentType.APARTMENT, id)
+
+    return {
+      ...apartment,
+      media: media.map(m => m.imageUrl)
+    }
   }
 
-  async update(id: string, body: UpdateApartmentDto) {
+  async update(id: string, { media, ...body }: UpdateApartmentDto) {
     const apartment = await this.repo.findOne({
       where: { id },
       relations: ['neighborhood']
@@ -88,7 +104,10 @@ export class ApartmentsService {
 
     Object.assign(apartment, body)
 
-    return await this.repo.save(apartment);
+    await this.repo.save(apartment);
+    await this.mediaService.saveImages(ImageParentType.APARTMENT, id, media);
+    
+    return this.repo.findOneBy({ id });
   }
 
   remove(id: number) {
