@@ -5,12 +5,16 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { State } from './entities/state.entity';
 import { ILike, Repository } from 'typeorm';
 import { Point } from 'geojson';
+import { ImageParentType, Media } from 'src/media/entities/media.entity';
+import { MediaService } from 'src/media/media.service';
 
 @Injectable()
 export class StateService {
   constructor(
     @InjectRepository(State)
     private readonly repo: Repository<State>,
+    private readonly mediaService: MediaService,
+
   ) { }
 
   async create(body: CreateStateDto) {
@@ -25,7 +29,12 @@ export class StateService {
       location: pointObject,
     });
 
-    return await this.repo.save(state);
+    const savedState = await this.repo.save(state);
+    const media = await this.mediaService.saveImages(ImageParentType.STATE, savedState.id, body.media  )
+    return {
+      ...savedState,
+      mediaUrls: media.map(m => m.imageUrl)
+    }
   }
 
   async findAll(name?: string) {
@@ -41,10 +50,17 @@ export class StateService {
   }
 
   async findOne(id: string) {
-    return await this.repo.findOneBy({ id });
+
+    const state = await this.repo.findOneBy({ id });
+    const media = await this.mediaService.findByTypeAndId(ImageParentType.STATE, id)
+
+    return {
+      ...state,
+      media: media.map(m => m.imageUrl)
+    }
   }
 
-  async update(id: string, body: UpdateStateDto) {
+  async update(id: string, {media, ...body}: UpdateStateDto) {
 
     const state = await this.repo.findOneBy({ id });
 
@@ -62,6 +78,7 @@ export class StateService {
     }
 
     await this.repo.update(id, body);
+    await this.mediaService.saveImages(ImageParentType.STATE, id, media)
 
     return this.repo.findOneBy({ id });
   }

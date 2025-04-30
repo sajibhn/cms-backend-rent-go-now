@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsObject } from 'class-validator';
+import { IsString, IsOptional, IsObject, IsArray } from 'class-validator';
 import { Point } from 'geojson';
 
 export class CreateStateDto {
@@ -11,6 +11,9 @@ export class CreateStateDto {
 
 	@IsObject()
 	location: Point;
+
+	@IsArray()
+	media: string[];
 
 	@IsString()
 	url: string;

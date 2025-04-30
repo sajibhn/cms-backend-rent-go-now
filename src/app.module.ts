@@ -12,6 +12,7 @@ import { CityModule } from './city/city.module';
 import { NeighborhoodModule } from './neighborhood/neighborhood.module';
 import { ApartmentsModule } from './apartments/apartments.module';
 import { UnitsModule } from './units/units.module';
+import { MediaModule } from './media/media.module';
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import { UnitsModule } from './units/units.module';
     CityModule,
     NeighborhoodModule,
     ApartmentsModule,
-    UnitsModule
+    UnitsModule,
+    MediaModule
   ],
   controllers: [AppController],
   providers: [AppService],
